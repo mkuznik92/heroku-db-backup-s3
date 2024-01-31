@@ -80,7 +80,7 @@ $ heroku logs --ps scheduler.x --app <you_app>
 Different versions of openssl can cause decryption to fail. If you receive an error when trying to decrypt, you can run an alternative version of openssl inside a Docker container, e.g:
 
 ```bash
-$ docker run --rm -it -v /path/to/backup:/backups -w /backups alpine /bin/ash
+$ docker run --rm -it -v /path/to/backup:/backups -w /backups alpine:3.17 /bin/ash
 $$ apk add --update openssl
 $$ openssl enc -d -aes-256-cbc -in /backups/your-encrypted-backup.gz.enc -out /backups/decrypted-backup.gz
 $$ exit
