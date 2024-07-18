@@ -66,11 +66,6 @@ if [[ -z "$DBURL_FOR_BACKUP" ]] ; then
   fi
 fi
 
-if [[ -z "$DB_BACKUP_ENC_KEY" ]]; then
-  echo "Missing DB_BACKUP_ENC_KEY variable"
-  exit 1
-fi
-
 printf "${Green}Start dump${EC}"
 # Maybe in next 'version' use heroku-toolbelt
 # /app/vendor/heroku-toolbelt/bin/heroku pg:backups capture $DATABASE --app $HEROKU_TOOLBELT_APP
@@ -79,9 +74,9 @@ printf "${Green}Start dump${EC}"
 # gzip /tmp/"${DBNAME}_${FILENAME}"
 
 if [[ $DB_BACKUP_HOST ]]; then
-  mysqldump -h $DB_BACKUP_HOST -p$DB_BACKUP_PASSWORD -u$DB_BACKUP_USER $DB_BACKUP_DATABASE | gzip | openssl enc -aes-256-cbc -e -pass "env:DB_BACKUP_ENC_KEY" > /tmp/"${DBNAME}_${FILENAME}".gz.enc
+  mysqldump -h $DB_BACKUP_HOST -p$DB_BACKUP_PASSWORD -u$DB_BACKUP_USER $DB_BACKUP_DATABASE | gzip > /tmp/"${DBNAME}_${FILENAME}".gz.enc
 elif [[ $DBURL_FOR_BACKUP = postgres* ]]; then
-  pg_dump $DBURL_FOR_BACKUP | gzip | openssl enc -aes-256-cbc -e -pass "env:DB_BACKUP_ENC_KEY" > /tmp/"${DBNAME}_${FILENAME}".gz.enc
+  pg_dump $DBURL_FOR_BACKUP | gzip > /tmp/"${DBNAME}_${FILENAME}".gz.enc
 else
   echo "Unknown database URL protocol. Must be mysql, mysql2 or postgres"
   exit 1;
