@@ -14,7 +14,6 @@ $ heroku config:add DB_BACKUP_AWS_ACCESS_KEY_ID=someaccesskey --app <your_app>
 $ heroku config:add DB_BACKUP_AWS_SECRET_ACCESS_KEY=supermegasecret --app <your_app>
 $ heroku config:add DB_BACKUP_AWS_DEFAULT_REGION=eu-central-1 --app <your_app>
 $ heroku config:add DB_BACKUP_S3_BUCKET_PATH=your-bucket --app <your_app>
-$ heroku config:add DB_BACKUP_ENC_KEY=somethingverysecret --app <your_app>
 ```
 - In future release (maybe) will use heroku-toolbelt
 ```
@@ -71,17 +70,4 @@ In case if scheduler doesn't run your task, check logs using this e.g.:
 ```
 $ heroku logs -t  --app <your_app> | grep 'backup.sh'
 $ heroku logs --ps scheduler.x --app <you_app>
-```
-
-### Restoring
-
-#### Can't decrypt backups
-
-Different versions of openssl can cause decryption to fail. If you receive an error when trying to decrypt, you can run an alternative version of openssl inside a Docker container, e.g:
-
-```bash
-$ docker run --rm -it -v /path/to/backup:/backups -w /backups alpine:3.17 /bin/ash
-$$ apk add --update openssl
-$$ openssl enc -d -aes-256-cbc -in /backups/your-encrypted-backup.gz.enc -out /backups/decrypted-backup.gz
-$$ exit
 ```
