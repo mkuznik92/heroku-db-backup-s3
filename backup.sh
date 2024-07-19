@@ -67,16 +67,11 @@ if [[ -z "$DBURL_FOR_BACKUP" ]] ; then
 fi
 
 printf "${Green}Start dump${EC}"
-# Maybe in next 'version' use heroku-toolbelt
-# /app/vendor/heroku-toolbelt/bin/heroku pg:backups capture $DATABASE --app $HEROKU_TOOLBELT_APP
-# BACKUP_URL=`/app/vendor/heroku-toolbelt/bin/heroku pg:backups:public-url --app $HEROKU_TOOLBELT_APP | cat`
-# curl --progress-bar -o /tmp/"${DBNAME}_${FILENAME}" $BACKUP_URL
-# gzip /tmp/"${DBNAME}_${FILENAME}"
 
 if [[ $DB_BACKUP_HOST ]]; then
   mysqldump --no-tablespaces -h $DB_BACKUP_HOST -p$DB_BACKUP_PASSWORD -u$DB_BACKUP_USER $DB_BACKUP_DATABASE | gzip > /tmp/"${DBNAME}_${FILENAME}".gz
 elif [[ $DBURL_FOR_BACKUP = postgres* ]]; then
-  pg_dump $DBURL_FOR_BACKUP | gzip > /tmp/"${DBNAME}_${FILENAME}".gz.enc
+  pg_dump $DBURL_FOR_BACKUP | gzip > /tmp/"${DBNAME}_${FILENAME}".gz
 else
   echo "Unknown database URL protocol. Must be mysql, mysql2 or postgres"
   exit 1;
@@ -86,7 +81,7 @@ fi;
 EXPIRATION_DATE=$(date -d "$EXPIRATION days" +"%Y-%m-%dT%H:%M:%SZ")
 
 printf "${Green}Move dump to AWS${EC}"
-AWS_ACCESS_KEY_ID=$DB_BACKUP_AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$DB_BACKUP_AWS_SECRET_ACCESS_KEY /app/vendor/bin/aws --region $DB_BACKUP_AWS_DEFAULT_REGION s3 cp /tmp/"${DBNAME}_${FILENAME}".gz.enc s3://$DB_BACKUP_S3_BUCKET_PATH/$DBNAME/"${DBNAME}_${FILENAME}".gz.enc --expires $EXPIRATION_DATE
+AWS_ACCESS_KEY_ID=$DB_BACKUP_AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$DB_BACKUP_AWS_SECRET_ACCESS_KEY /app/vendor/bin/aws --region $DB_BACKUP_AWS_DEFAULT_REGION s3 cp /tmp/"${DBNAME}_${FILENAME}".gz s3://$DB_BACKUP_S3_BUCKET_PATH/$DBNAME/"${DBNAME}_${FILENAME}".gz --expires $EXPIRATION_DATE
 
 # cleaning after all
-rm -rf /tmp/"${DBNAME}_${FILENAME}".gz.enc
+rm -rf /tmp/"${DBNAME}_${FILENAME}".gz
